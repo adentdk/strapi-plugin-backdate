@@ -1,0 +1,5 @@
+{
+  "plugin.name": "Manual Publish Date",
+  "page.title": "Update First Published At",
+  "page.description": "Manually set the firstPublishedAt date for any content entry with Draft & Publish enabled."
+}
