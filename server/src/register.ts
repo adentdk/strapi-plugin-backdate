@@ -57,12 +57,26 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
         // Store the manual value so we can restore it after publish
         const manualDate = existingEntries[0].first_published_at;
 
-        const result = await next();
+        let result: any;
+        try {
+          result = await next();
+        } catch (publishError) {
+          // If publish fails, don't leave things hanging — rethrow
+          throw publishError;
+        }
 
         // After publish, restore the manual firstPublishedAt
-        await knex(tableName)
-          .where('document_id', documentId)
-          .update('first_published_at', manualDate);
+        // Use a separate try/catch so we don't lose the result if restore fails
+        try {
+          await knex(tableName)
+            .where('document_id', documentId)
+            .update('first_published_at', manualDate);
+        } catch (restoreError) {
+          strapi.log.error(
+            `[backdate] Failed to restore firstPublishedAt for ${uid}:${documentId}`,
+            restoreError
+          );
+        }
 
         return result;
       }
